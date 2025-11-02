@@ -32,42 +32,42 @@ export const authService = {
 
 export const productService = {
   async getProducts(params = {}) {
-    const response = await api.get('/products', { params });
+    const response = await api.get('/products/', { params });
     return response.data;
   },
 
   async getProduct(id) {
-    const response = await api.get(`/products/${id}`);
+    const response = await api.get(`/products/${id}/`);
     return response.data;
   },
 
   async createProduct(data) {
-    const response = await api.post('/products', data);
+    const response = await api.post('/products/', data);
     return response.data;
   },
 
   async updateProduct(id, data) {
-    const response = await api.put(`/products/${id}`, data);
+    const response = await api.put(`/products/${id}/`, data);
     return response.data;
   },
 
   async deleteProduct(id) {
-    const response = await api.delete(`/products/${id}`);
+    const response = await api.delete(`/products/${id}/`);
     return response.data;
   },
 
   async getCategories() {
-    const response = await api.get('/products/categories');
+    const response = await api.get('/products/categories/');
     return response.data;
   },
 
   async getBrands() {
-    const response = await api.get('/products/brands');
+    const response = await api.get('/products/brands/');
     return response.data;
   },
 
   async getLowStockProducts() {
-    const response = await api.get('/products/low-stock');
+    const response = await api.get('/products/low-stock/');
     return response.data;
   },
 };
