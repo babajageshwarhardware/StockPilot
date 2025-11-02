@@ -3,7 +3,7 @@ import { MainLayout } from '../components/layout/MainLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { productService, customerService, supplierService } from '../api/services';
 import { Package, Users, Truck, AlertTriangle, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 
 const StatCard = ({ title, value, icon: Icon, color, trend }) => (
   <Card data-testid={`stat-card-${title.toLowerCase().replace(/\s/g, '-')}`}>
