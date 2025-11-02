@@ -8,6 +8,8 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  maxRedirects: 5,
+  validateStatus: (status) => status >= 200 && status < 400,
 });
 
 // Request interceptor to add auth token
