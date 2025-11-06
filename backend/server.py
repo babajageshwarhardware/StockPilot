@@ -50,6 +50,7 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(products_router, prefix="/api")
 app.include_router(customers_router, prefix="/api")
 app.include_router(suppliers_router, prefix="/api")
+app.include_router(sales_router, prefix="/api")
 
 # Health check endpoint
 @app.get("/api/health")
