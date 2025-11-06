@@ -51,7 +51,7 @@ class SalesAPITester:
             
             if response.status_code == 200:
                 data = response.json()
-                self.token = data.get("access_token")
+                self.token = data.get("token")  # Changed from access_token to token
                 self.headers["Authorization"] = f"Bearer {self.token}"
                 self.log_test("Authentication", True, "Successfully logged in")
                 return True
