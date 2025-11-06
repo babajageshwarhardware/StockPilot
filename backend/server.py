@@ -15,6 +15,7 @@ from routes.auth import router as auth_router
 from routes.products import router as products_router
 from routes.customers import router as customers_router
 from routes.suppliers import router as suppliers_router
+from routes.sales import router as sales_router
 
 # Configure logging
 logging.basicConfig(
