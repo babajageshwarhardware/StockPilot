@@ -67,6 +67,8 @@ const Sidebar = ({ open, setOpen }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'POS', href: '/pos', icon: ShoppingCart },
+    { name: 'Sales', href: '/sales', icon: Receipt },
     { name: 'Products', href: '/products', icon: Package },
     { name: 'Customers', href: '/customers', icon: Users },
     { name: 'Suppliers', href: '/suppliers', icon: Truck },
