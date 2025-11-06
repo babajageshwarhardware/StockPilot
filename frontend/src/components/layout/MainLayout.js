@@ -8,7 +8,9 @@ import {
   Truck, 
   LogOut,
   Menu,
-  X
+  X,
+  ShoppingCart,
+  Receipt
 } from 'lucide-react';
 import { Button } from '../ui/button';
 
