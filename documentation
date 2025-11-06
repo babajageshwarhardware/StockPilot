@@ -1,0 +1,1916 @@
+# 🚀 StockPilot - Complete Technical Implementation Documentation
+
+**Version:** 1.0.0  
+**Last Updated:** November 2, 2025  
+**Tech Stack:** React.js + Express.js + MongoDB  
+**Target Audience:** AI Development Team  
+**Status:** Implementation Ready
+
+---
+
+## 📋 Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [System Architecture](#system-architecture)
+3. [Technology Stack](#technology-stack)
+4. [Database Architecture](#database-architecture)
+5. [Backend Configuration](#backend-configuration)
+6. [Database Schemas](#database-schemas)
+7. [API Endpoints](#api-endpoints)
+8. [Authentication & Authorization](#authentication--authorization)
+9. [Frontend Architecture](#frontend-architecture)
+10. [Project Structure](#project-structure)
+11. [Implementation Strategy](#implementation-strategy)
+12. [Security Guidelines](#security-guidelines)
+13. [Testing Strategy](#testing-strategy)
+14. [Deployment Guide](#deployment-guide)
+15. [Performance Optimization](#performance-optimization)
+
+---
+
+## 1. Executive Summary
+
+### 1.1 Project Overview
+StockPilot is a comprehensive store management and analytics system designed to help retailers manage inventory, sales, purchases, and business analytics in real-time. The system provides automated profit tracking, predictive analytics, and multi-user role-based access.
+
+### 1.2 Core Objectives
+- Automate inventory and sales management
+- Provide real-time business analytics and insights
+- Enable multi-user collaboration with role-based permissions
+- Ensure data security and scalability
+- Support predictive analysis for stock management
+
+### 1.3 Key Features
+- Product & Inventory Management
+- Purchase Order Management
+- Sales & Invoicing System
+- Customer & Supplier Management
+- Real-time Analytics Dashboard
+- Financial Reports & P&L Statements
+- Role-based Access Control
+- AI-powered Predictions
+
+---
+
+## 2. System Architecture
+
+### 2.1 Architecture Overview
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      CLIENT LAYER                            │
+│  React.js + TailwindCSS + React Router + Axios              │
+│  (State: Redux Toolkit)                                      │
+└──────────────────┬──────────────────────────────────────────┘
+                   │ HTTPS/REST API
+┌──────────────────▼──────────────────────────────────────────┐
+│                   API GATEWAY LAYER                          │
+│  Express.js + Helmet + CORS + Rate Limiting                 │
+│  JWT Authentication Middleware                               │
+└──────────────────┬──────────────────────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────────────────────┐
+│                  BUSINESS LOGIC LAYER                        │
+│  Controllers + Services + Validators                         │
+└──────────────────┬──────────────────────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────────────────────┐
+│                    DATA LAYER                                │
+│  Mongoose ODM + MongoDB (Atlas/Local)                        │
+│  Aggregation Pipelines + Indexing                            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 2.2 Architecture Patterns
+- **MVC Pattern**: Model-View-Controller separation
+- **Repository Pattern**: Data access abstraction
+- **Middleware Pattern**: Request/response processing
+- **Service Layer Pattern**: Business logic encapsulation
+
+### 2.3 Communication Flow
+1. Client sends HTTP request to API endpoint
+2. Request passes through security middleware (CORS, Helmet, Rate Limiting)
+3. Authentication middleware validates JWT token
+4. Authorization middleware checks user permissions
+5. Validation middleware checks request data
+6. Controller processes request and calls service layer
+7. Service layer interacts with database through Mongoose models
+8. Response formatted and sent back to client
+
+---
+
+## 3. Technology Stack
+
+### 3.1 Frontend Technologies
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| React.js | 18.2+ | UI Framework |
+| Redux Toolkit | 2.0+ | State Management |
+| React Router | 6.x | Routing |
+| TailwindCSS | 3.x | Styling |
+| Axios | 1.x | HTTP Client |
+| Chart.js | 4.x | Data Visualization |
+| React Hook Form | 7.x | Form Management |
+| React Query | 5.x | Server State Management |
+
+### 3.2 Backend Technologies
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Node.js | 18.x LTS | Runtime Environment |
+| Express.js | 4.18+ | Web Framework |
+| MongoDB | 6.x+ | Database |
+| Mongoose | 8.x | ODM |
+| JWT | 9.x | Authentication |
+| Bcrypt.js | 2.4+ | Password Hashing |
+
+### 3.3 Security & Middleware
+| Package | Purpose |
+|---------|---------|
+| Helmet | Security Headers |
+| CORS | Cross-Origin Resource Sharing |
+| Express Rate Limit | API Rate Limiting |
+| Express Validator | Input Validation |
+| Mongo Sanitize | NoSQL Injection Prevention |
+| XSS-Clean | XSS Attack Prevention |
+| HPP | HTTP Parameter Pollution Prevention |
+
+### 3.4 Development Tools
+| Tool | Purpose |
+|------|---------|
+| Nodemon | Development Server |
+| ESLint | Code Linting |
+| Prettier | Code Formatting |
+| Jest | Testing Framework |
+| Supertest | API Testing |
+| Postman | API Documentation |
+
+---
+
+## 4. Database Architecture
+
+### 4.1 Database Selection Rationale
+**Why MongoDB?**
+- Flexible schema design for evolving business needs
+- Excellent performance for read-heavy operations
+- Built-in aggregation framework for complex analytics
+- Horizontal scalability through sharding
+- Native JSON support for seamless frontend integration
+- Strong community and cloud support (MongoDB Atlas)
+
+### 4.2 Database Deployment Options
+
+#### Option 1: MongoDB Atlas (Cloud - Recommended)
+- Fully managed cloud database
+- Automatic backups and point-in-time recovery
+- Built-in monitoring and performance optimization
+- Global cluster deployment
+- Free tier available for development
+
+#### Option 2: Local MongoDB Installation
+- Full control over database
+- No internet dependency
+- Lower latency for local development
+- Requires manual backup and maintenance
+
+### 4.3 Connection Configuration Strategy
+
+**Development Environment:**
+- Use local MongoDB instance
+- Connection: `mongodb://localhost:27017/stockpilot_dev`
+
+**Staging Environment:**
+- Use MongoDB Atlas shared cluster
+- Connection: `mongodb+srv://<user>:<pass>@cluster-staging.mongodb.net/stockpilot_staging`
+
+**Production Environment:**
+- Use MongoDB Atlas dedicated cluster
+- Connection: `mongodb+srv://<user>:<pass>@cluster-prod.mongodb.net/stockpilot_prod`
+- Enable IP whitelisting
+- Use VPC peering for enhanced security
+
+### 4.4 Database Performance Configuration
+
+**Connection Pool Settings:**
+- Max Pool Size: 10 connections
+- Min Pool Size: 2 connections
+- Server Selection Timeout: 5000ms
+- Socket Timeout: 45000ms
+
+**Read/Write Concerns:**
+- Write Concern: `{ w: 'majority', j: true }`
+- Read Preference: `primary` for consistency
+- Read Concern: `majority` for critical operations
+
+### 4.5 Indexing Strategy
+
+**Critical Indexes:**
+- Users: `{ email: 1 }` (unique), `{ role: 1 }`
+- Products: `{ sku: 1 }` (unique), `{ category: 1, brand: 1 }`, `{ name: 'text' }`
+- Sales: `{ invoiceNumber: 1 }` (unique), `{ saleDate: -1 }`, `{ customer: 1 }`
+- Purchases: `{ purchaseOrderNumber: 1 }` (unique), `{ supplier: 1 }`
+- Customers: `{ phone: 1 }`, `{ email: 1 }`
+
+**Compound Indexes for Analytics:**
+- Sales: `{ status: 1, saleDate: -1 }`
+- Products: `{ isActive: 1, 'stock.quantity': 1 }`
+
+---
+
+## 5. Backend Configuration
+
+### 5.1 Environment Variables Setup
+
+**File: `.env`**
+```plaintext
+# Server Configuration
+NODE_ENV=development
+PORT=5000
+CLIENT_URL=http://localhost:3000
+
+# Database Configuration
+MONGO_URI=mongodb://localhost:27017/stockpilot
+# For MongoDB Atlas:
+# MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/stockpilot?retryWrites=true&w=majority
+
+# JWT Configuration
+JWT_SECRET=your_super_secure_random_secret_key_min_32_chars
+JWT_EXPIRE=7d
+JWT_REFRESH_SECRET=your_refresh_token_secret_key
+JWT_REFRESH_EXPIRE=30d
+
+# Email Configuration (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_EMAIL=your_email@gmail.com
+SMTP_PASSWORD=your_app_specific_password
+
+# Cloud Storage (Optional - AWS S3)
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_BUCKET_NAME=stockpilot-uploads
+AWS_REGION=us-east-1
+
+# Payment Gateway (Optional)
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+
+# Application Settings
+MAX_FILE_SIZE=10485760
+ALLOWED_FILE_TYPES=image/jpeg,image/png,image/jpg,application/pdf
+```
+
+### 5.2 Database Connection Module
+
+**File: `config/database.js`**
+
+**Purpose:** Establish and manage MongoDB connection
+
+**Key Features:**
+- Connection retry logic
+- Connection pooling
+- Error handling
+- Connection event listeners
+
+**Connection Parameters:**
+- `useNewUrlParser: true` - Use new URL parser
+- `useUnifiedTopology: true` - Use new server discovery engine
+- `maxPoolSize: 10` - Maximum 10 connections in pool
+- `serverSelectionTimeoutMS: 5000` - 5 second timeout
+- `socketTimeoutMS: 45000` - 45 second socket timeout
+
+**Connection Events to Monitor:**
+- `connected` - Successfully connected
+- `error` - Connection error occurred
+- `disconnected` - Connection lost
+- `reconnected` - Connection reestablished
+
+### 5.3 Server Configuration
+
+**File: `server.js`**
+
+**Core Middleware Stack (in order):**
+1. **Body Parser** - Parse JSON and URL-encoded data (10MB limit)
+2. **Helmet** - Set security HTTP headers
+3. **Mongo Sanitize** - Prevent NoSQL injection
+4. **XSS Clean** - Prevent XSS attacks
+5. **HPP** - Prevent HTTP parameter pollution
+6. **CORS** - Enable cross-origin requests
+7. **Morgan** - HTTP request logger (dev only)
+8. **Rate Limiter** - Limit API requests
+
+**Global Error Handling:**
+- Catch unhandled promise rejections
+- Catch uncaught exceptions
+- Custom error handler middleware
+- 404 route handler
+
+---
+
+## 6. Database Schemas
+
+### 6.1 User Schema
+
+**Collection Name:** `users`
+
+**Schema Fields:**
+| Field | Type | Required | Validation | Description |
+|-------|------|----------|------------|-------------|
+| name | String | Yes | max 50 chars | User's full name |
+| email | String | Yes | email format, unique | Login email |
+| password | String | Yes | min 8 chars, hashed | Encrypted password |
+| role | String | Yes | enum | admin, manager, sales_executive, accountant |
+| phone | String | No | 10 digits | Contact number |
+| isActive | Boolean | No | default: true | Account status |
+| permissions | [String] | No | enum array | Granular permissions |
+| lastLogin | Date | No | - | Last login timestamp |
+| refreshToken | String | No | - | JWT refresh token |
+| createdAt | Date | Auto | - | Creation timestamp |
+| updatedAt | Date | Auto | - | Update timestamp |
+
+**Indexes:**
+- `email` (unique)
+- `role`
+
+**Methods:**
+- `comparePassword()` - Verify password
+- `generateAuthToken()` - Create JWT token
+
+**Hooks:**
+- Pre-save: Hash password with bcrypt (salt rounds: 12)
+
+**Permission Types:**
+- `view_sales`, `create_sales`, `edit_sales`, `delete_sales`
+- `view_products`, `create_products`, `edit_products`, `delete_products`
+- `view_purchases`, `create_purchases`, `edit_purchases`, `delete_purchases`
+- `view_analytics`, `view_reports`, `manage_users`
+
+---
+
+### 6.2 Product Schema
+
+**Collection Name:** `products`
+
+**Schema Structure:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | String | Yes | Product name (max 200 chars) |
+| sku | String | Yes | Stock Keeping Unit (unique, uppercase) |
+| barcode | String | No | Barcode number (unique) |
+| description | String | No | Product description (max 1000 chars) |
+| category | String | Yes | Product category (indexed) |
+| brand | String | No | Brand name (indexed) |
+| unit | String | No | Unit of measurement (piece/kg/liter/meter/box/dozen) |
+
+**Nested Object: pricing**
+| Field | Type | Validation | Description |
+|-------|------|------------|-------------|
+| purchasePrice | Number | min: 0 | Cost price |
+| sellingPrice | Number | min: 0 | Selling price |
+| mrp | Number | min: 0 | Maximum retail price |
+| discount | Number | 0-100 | Discount percentage |
+| taxRate | Number | 0-100 | Tax percentage (GST/VAT) |
+
+**Nested Object: stock**
+| Field | Type | Description |
+|-------|------|-------------|
+| quantity | Number | Current stock quantity |
+| reorderPoint | Number | Low stock threshold |
+| warehouse | String | Warehouse location |
+
+**References:**
+- `supplier` → Supplier collection
+- `createdBy` → User collection
+
+**Indexes:**
+- `sku` (unique)
+- `name, description` (text search)
+- `category, brand` (compound)
+- `stock.quantity`
+
+**Virtual Fields:**
+- `profitMargin` - Calculated: `((sellingPrice - purchasePrice) / purchasePrice) * 100`
+
+---
+
+### 6.3 Sale Schema
+
+**Collection Name:** `sales`
+
+**Main Fields:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| invoiceNumber | String | Yes | Auto-generated unique invoice ID |
+| customer | ObjectId | Yes | Reference to Customer |
+| saleDate | Date | No | Default: now |
+| status | String | No | completed/returned/cancelled |
+| notes | String | No | Additional notes |
+| createdBy | ObjectId | Yes | Reference to User |
+
+**Array Field: items**
+| Field | Type | Description |
+|-------|------|-------------|
+| product | ObjectId | Reference to Product |
+| quantity | Number | Quantity sold |
+| unitPrice | Number | Price per unit |
+| discount | Number | Item-level discount % |
+| taxRate | Number | Tax rate % |
+| subtotal | Number | Item total |
+
+**Nested Object: totals**
+| Field | Type | Description |
+|-------|------|-------------|
+| subtotal | Number | Sum of all items |
+| discount | Number | Total discount amount |
+| tax | Number | Total tax amount |
+| total | Number | Final payable amount |
+
+**Nested Object: payment**
+| Field | Type | Description |
+|-------|------|-------------|
+| method | String | cash/card/upi/credit/other |
+| status | String | paid/partial/pending |
+| amountPaid | Number | Amount received |
+| amountDue | Number | Outstanding amount |
+| transactionId | String | Payment reference |
+
+**Indexes:**
+- `invoiceNumber` (unique)
+- `saleDate` (descending)
+- `customer, saleDate` (compound)
+- `status`
+
+**Business Logic:**
+- Auto-decrement product stock on sale creation
+- Calculate profit margin per transaction
+- Update customer outstanding balance for credit sales
+- Generate sequential invoice numbers (INV-000001 format)
+
+---
+
+### 6.4 Purchase Schema
+
+**Collection Name:** `purchases`
+
+**Main Fields:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| purchaseOrderNumber | String | Yes | Unique PO number |
+| supplier | ObjectId | Yes | Reference to Supplier |
+| purchaseDate | Date | No | Default: now |
+| receivedDate | Date | No | Actual receipt date |
+| status | String | No | ordered/received/cancelled |
+| notes | String | No | Additional notes |
+| createdBy | ObjectId | Yes | Reference to User |
+
+**Array Field: items**
+| Field | Type | Description |
+|-------|------|-------------|
+| product | ObjectId | Reference to Product |
+| quantity | Number | Quantity purchased |
+| unitPrice | Number | Purchase price per unit |
+| subtotal | Number | Item total |
+
+**Nested Object: totals**
+| Field | Type | Description |
+|-------|------|-------------|
+| subtotal | Number | Sum of all items |
+| tax | Number | Total tax |
+| shipping | Number | Shipping charges |
+| total | Number | Final payable |
+
+**Nested Object: payment**
+| Field | Type | Description |
+|-------|------|-------------|
+| status | String | paid/partial/pending |
+| amountPaid | Number | Amount paid |
+| amountDue | Number | Outstanding |
+
+**Indexes:**
+- `purchaseOrderNumber` (unique)
+- `supplier, purchaseDate` (compound)
+- `status`
+
+**Business Logic:**
+- Auto-increment product stock when status = 'received'
+- Update supplier outstanding balance
+- Generate sequential PO numbers (PO-000001 format)
+
+---
+
+### 6.5 Customer Schema
+
+**Collection Name:** `customers`
+
+**Schema Fields:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | String | Yes | Customer name |
+| email | String | No | Email address (validated) |
+| phone | String | Yes | 10-digit phone number |
+| gstNumber | String | No | GST registration number |
+| loyaltyPoints | Number | No | Reward points (default: 0) |
+| creditLimit | Number | No | Maximum credit allowed |
+| outstandingBalance | Number | No | Current outstanding amount |
+| isActive | Boolean | No | Account status (default: true) |
+
+**Nested Object: address**
+| Field | Type | Description |
+|-------|------|-------------|
+| street | String | Street address |
+| city | String | City name |
+| state | String | State name |
+| pincode | String | Postal code |
+| country | String | Country (default: India) |
+
+**Indexes:**
+- `phone`
+- `email`
+- `name` (text search)
+
+---
+
+### 6.6 Supplier Schema
+
+**Collection Name:** `suppliers`
+
+**Schema Fields:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | String | Yes | Supplier name |
+| email | String | No | Email address |
+| phone | String | Yes | Contact number |
+| gstNumber | String | No | GST number |
+| paymentTerms | String | No | immediate/net15/net30/net60 |
+| outstandingBalance | Number | No | Amount owed to supplier |
+| rating | Number | No | Supplier rating (1-5) |
+| isActive | Boolean | No | Active status |
+
+**Nested Object: address**
+| Field | Type | Description |
+|-------|------|-------------|
+| street | String | Street address |
+| city | String | City |
+| state | String | State |
+| pincode | String | Postal code |
+| country | String | Country (default: India) |
+
+**Indexes:**
+- `name` (text search)
+- `phone`
+
+---
+
+### 6.7 Expense Schema
+
+**Collection Name:** `expenses`
+
+**Schema Fields:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| title | String | Yes | Expense title |
+| category | String | Yes | Expense category (enum) |
+| amount | Number | Yes | Expense amount |
+| date | Date | No | Expense date (default: now) |
+| paymentMethod | String | Yes | Payment method used |
+| notes | String | No | Additional notes |
+| createdBy | ObjectId | Yes | Reference to User |
+
+**Category Options:**
+- rent
+- utilities
+- salaries
+- marketing
+- transportation
+- maintenance
+- supplies
+- taxes
+- other
+
+**Payment Method Options:**
+- cash
+- card
+- upi
+- cheque
+- bank_transfer
+
+**Nested Object: receipt (optional)**
+| Field | Type | Description |
+|-------|------|-------------|
+| url | String | Receipt file URL |
+| publicId | String | Cloud storage ID |
+
+**Indexes:**
+- `date` (descending)
+- `category`
+
+---
+
+## 7. API Endpoints
+
+### 7.1 Authentication Endpoints
+
+**Base URL:** `/api/auth`
+
+| Method | Endpoint | Description | Auth | Body Parameters |
+|--------|----------|-------------|------|-----------------|
+| POST | `/register` | Register new user | No | name, email, password, role, phone |
+| POST | `/login` | User login | No | email, password |
+| POST | `/logout` | User logout | Yes | - |
+| GET | `/me` | Get current user profile | Yes | - |
+| PUT | `/update-profile` | Update user profile | Yes | name, phone |
+| PUT | `/change-password` | Change password | Yes | currentPassword, newPassword |
+| POST | `/forgot-password` | Request password reset | No | email |
+| POST | `/reset-password/:token` | Reset password with token | No | password |
+| POST | `/refresh-token` | Get new access token | No | refreshToken |
+
+**Response Format (Login):**
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "507f1f77bcf86cd799439011",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "admin",
+    "permissions": ["view_sales", "create_sales"]
+  }
+}
+```
+
+---
+
+### 7.2 Product Endpoints
+
+**Base URL:** `/api/products`
+
+| Method | Endpoint | Description | Auth | Query Params |
+|--------|----------|-------------|------|--------------|
+| GET | `/` | Get all products | Yes | page, limit, search, category, brand, lowStock |
+| GET | `/:id` | Get single product | Yes | - |
+| POST | `/` | Create product | Yes (admin/manager) | - |
+| PUT | `/:id` | Update product | Yes (admin/manager) | - |
+| DELETE | `/:id` | Delete product | Yes (admin) | - |
+| GET | `/low-stock` | Get low stock items | Yes | - |
+| POST | `/bulk-import` | Import CSV/Excel | Yes (admin/manager) | - |
+| GET | `/export` | Export to CSV | Yes | format (csv/excel) |
+| GET | `/categories` | Get all categories | Yes | - |
+| GET | `/brands` | Get all brands | Yes | - |
+
+**Response Format (List):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "507f1f77bcf86cd799439011",
+      "name": "Product Name",
+      "sku": "PROD-001",
+      "category": "Electronics",
+      "pricing": {
+        "sellingPrice": 1000,
+        "purchasePrice": 800
+      },
+      "stock": {
+        "quantity": 50
+      }
+    }
+  ],
+  "pagination": {
+    "total": 100,
+    "page": 1,
+    "pages": 5
+  }
+}
+```
+
+---
+
+### 7.3 Sales Endpoints
+
+**Base URL:** `/api/sales`
+
+| Method | Endpoint | Description | Auth | Body/Query |
+|--------|----------|-------------|------|------------|
+| GET | `/` | Get all sales | Yes | page, limit, startDate, endDate, status |
+| GET | `/:id` | Get single sale | Yes | - |
+| POST | `/` | Create new sale | Yes | customer, items, payment |
+| PUT | `/:id` | Update sale | Yes (admin/manager) | - |
+| DELETE | `/:id` | Delete sale | Yes (admin) | - |
+| GET | `/invoice/:id` | Get invoice PDF | Yes | - |
+| POST | `/:id/return` | Process return | Yes | items, reason |
+| GET | `/stats` | Get sales statistics | Yes | startDate, endDate |
+| GET | `/daily-summary` | Get today's sales | Yes | - |
+| GET | `/top-customers` | Top customers by revenue | Yes | limit |
+
+**Request Body (Create Sale):**
+```json
+{
+  "customer": "507f1f77bcf86cd799439011",
+  "items": [
+    {
+      "product": "507f1f77bcf86cd799439012",
+      "quantity": 2,
+      "unitPrice": 1000,
+      "discount": 10,
+      "taxRate": 18
+    }
+  ],
+  "payment": {
+    "method": "upi",
+    "amountPaid": 1800,
+    "transactionId": "TXN123456"
+  },
+  "notes": "Customer requested express delivery"
+}
+```
+
+---
+
+### 7.4 Purchase Endpoints
+
+**Base URL:** `/api/purchases`
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/` | Get all purchases | Yes |
+| GET | `/:id` | Get single purchase | Yes |
+| POST | `/` | Create purchase order | Yes |
+| PUT | `/:id` | Update purchase | Yes (admin/manager) |
+| DELETE | `/:id` | Delete purchase | Yes (admin) |
+| PUT | `/:id/receive` | Mark as received | Yes |
+| POST | `/:id/return` | Return to supplier | Yes |
+| GET | `/pending` | Get pending orders | Yes |
+| GET | `/by-supplier/:supplierId` | Supplier purchase history | Yes |
+
+---
+
+### 7.5 Customer Endpoints
+
+**Base URL:** `/api/customers`
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/` | Get all customers | Yes |
+| GET | `/:id` | Get single customer | Yes |
+| POST | `/` | Create customer | Yes |
+| PUT | `/:id` | Update customer | Yes |
+| DELETE | `/:id` | Delete customer | Yes (admin) |
+| GET | `/:id/transactions` | Customer transaction history | Yes |
+| GET | `/:id/outstanding` | Outstanding balance | Yes |
+| POST | `/:id/payment` | Record payment | Yes |
+
+---
+
+### 7.6 Supplier Endpoints
+
+**Base URL:** `/api/suppliers`
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/` | Get all suppliers | Yes |
+| GET | `/:id` | Get single supplier | Yes |
+| POST | `/` | Create supplier | Yes |
+| PUT | `/:id` | Update supplier | Yes |
+| DELETE | `/:id` | Delete supplier | Yes (admin) |
+| GET | `/:id/purchases` | Supplier purchase history | Yes |
+| GET | `/:id/outstanding` | Outstanding balance | Yes |
+
+---
+
+### 7.7 Analytics Endpoints
+
+**Base URL:** `/api/analytics`
+
+| Method | Endpoint | Description | Auth | Query Params |
+|--------|----------|-------------|------|--------------|
+| GET | `/dashboard` | Main dashboard KPIs | Yes | startDate, endDate, period |
+| GET | `/sales-trends` | Sales trend analysis | Yes | period (day/week/month) |
+| GET | `/profit-analysis` | Profit breakdown | Yes | startDate, endDate |
+| GET | `/top-products` | Best selling products | Yes | limit, startDate, endDate |
+| GET | `/slow-moving` | Slow moving products | Yes | days |
+| GET | `/category-breakdown` | Sales by category | Yes | startDate, endDate |
+| GET | `/financial-report` | Complete financial report | Yes (admin/accountant) | startDate, endDate |
+| GET | `/inventory-valuation` | Current stock value | Yes | - |
+| GET | `/customer-analysis` | Customer insights | Yes | - |
+
+**Response Format (Dashboard):**
+```json
+{
+  "success": true,
+  "data": {
+    "period": {
+      "start": "2025-10-01T00:00:00.000Z",
+      "end": "2025-11-02T23:59:59.999Z"
+    },
+    "sales": {
+      "total": 250000,
+      "transactions": 150,
+      "averageOrderValue": 1666.67
+    },
+    "purchases": {
+      "total": 180000,
+      "orders": 45
+    },
+    "profit": {
+      "gross": 70000,
+      "net": 55000,
+      "margin": "28.00"
+    },
+    "inventory": {
+      "totalValue": 500000,
+      "lowStockItems": 12
+    }
+  }
+}
+```
+
+---
+
+### 7.8 Expense Endpoints
+
+**Base URL:** `/api/expenses`
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/` | Get all expenses | Yes |
+| GET | `/:id` | Get single expense | Yes |
+| POST | `/` | Create expense | Yes |
+| PUT | `/:id` | Update expense | Yes (admin/manager) |
+| DELETE | `/:id` | Delete expense | Yes (admin) |
+| GET | `/by-category` | Expenses by category | Yes |
+| GET | `/summary` | Monthly expense summary | Yes |
+
+---
+
+## 8. Authentication & Authorization
+
+### 8.1 JWT Authentication Flow
+
+**Registration Flow:**
+1. User submits registration form with name, email, password, role
+2. Backend validates input data
+3. Check if email already exists
+4. Hash password using bcrypt (12 salt rounds)
+5. Create user in database
+6. Generate JWT token with user ID and role
+7. Return token and user data to client
+8. Client stores token in localStorage
+
+**Login Flow:**
+1. User submits email and password
+2. Backend finds user by email
+3. Compare submitted password with hashed password
+4. Verify user account is active
+5. Update lastLogin timestamp
+6. Generate JWT access token (expires in 7 days)
+7. Generate JWT refresh token (expires in 30 days)
+8. Return both tokens to client
+9. Client stores tokens in localStorage
+
+**Request Authentication:**
+1. Client includes token in Authorization header: `Bearer <token>`
+2. Auth middleware extracts token from header
+3. Verify token signature and expiration
+4. Decode token to get user ID
+5. Fetch user from database
+6. Attach user object to request
+7. Proceed to route handler
+
+**Token Refresh Flow:**
+1. Access token expires
+2. Client receives 401 Unauthorized
+3. Client sends refresh token to `/auth/refresh-token`
+4. Backend validates refresh token
+5. Generate new access token
+6. Return new token to client
+7. Client retries original request with new token
+
+### 8.2 Authorization Levels
+
+**Role Hierarchy:**
+```
+Admin (Full Access)
+  ├── Manager (All except user management)
+  │   ├── Accountant (Finance + Reports)
+  │   └── Sales Executive (Sales + Customers)
+```
+
+**Permission Matrix:**
+
+| Feature | Admin | Manager | Accountant | Sales Executive |
+|---------|-------|---------|------------|-----------------|
+| User Management | ✅ Full | ❌ No | ❌ No | ❌ No |
+| Product Management | ✅ Full | ✅ Full | 👁️ View | 👁️ View |
+| Sales Management | ✅ Full | ✅ Full | 👁️ View | ✅ Create/View |
+| Purchase Management | ✅ Full | ✅ Full | 👁️ View | ❌ No |
+| Customer Management | ✅ Full | ✅ Full | 👁️ View | ✅ Create/View |
+| Supplier Management | ✅ Full | ✅ Full | 👁️ View | ❌ No |
+| Analytics Dashboard | ✅ Full | ✅ Full | ✅ Full | 👁️ Basic |
+| Financial Reports | ✅ Full | ✅ Full | ✅ Full | ❌ No |
+| Expense Management | ✅ Full | ✅ Full | ✅ Full | ❌ No |
+| Settings | ✅ Full | ✅ Limited | ❌ No | ❌ No |
+
+### 8.3 Middleware Implementation Strategy
+
+**Auth Middleware (`middleware/auth.js`):**
+- Extract token from Authorization header
+- Verify token using JWT_SECRET
+- Decode and validate user ID
+- Fetch user from database
+- Check if user is active
+- Attach user to request object
+- Handle token expiration errors
+
+**Role Authorization Middleware:**
+- Check if user role matches required roles
+- Return 403 Forbidden if unauthorized
+- Support multiple role checking
+
+**Permission-Based Authorization:**
+- Check specific permissions from user.permissions array
+- Granular control beyond role-based access
+- Support for custom permission combinations
+
+**Rate Limiting Strategy:**
+- Login endpoint: 5 attempts per 15 minutes per IP
+- General API: 100 requests per 15 minutes per user
+- Analytics endpoint: 50 requests per 15 minutes
+- File upload: 10 requests per hour
+
+---
+
+## 9. Frontend Architecture
+
+### 9.1 React Application Structure
+
+**State Management Strategy:**
+- **Redux Toolkit** for global state (auth, products, sales, purchases)
+- **React Query** for server state caching
+- **Local State** (useState) for component-specific state
+- **Context API** for theme and preferences
+
+**Routing Strategy:**
+- Public routes: Login, Register, Forgot Password
+- Protected routes: All dashboard pages
+- Role-based route guards
+- Lazy loading for code splitting
+
+### 9.2 Redux Store Structure
+
+**Store Slices:**
+
+**1. authSlice:**
+- State: user, token, isAuthenticated, loading, error
+- Actions: login, logout, getCurrentUser, updateProfile
+- Persist: token in localStorage
+
+**2. productSlice:**
+- State: products, currentProduct, loading, error, pagination
+- Actions: fetchProducts, createProduct, updateProduct, deleteProduct
+- Filters: category, brand, search, lowStock
+
+**3. saleSlice:**
+- State: sales, currentSale, loading, error, stats
+- Actions: fetchSales, createSale, updateSale, generateInvoice
+- Real-time updates for dashboard
+
+**4. purchaseSlice:**
+- State: purchases, currentPurchase, loading, error
+- Actions: fetchPurchases, createPurchase, receivePurchase
+
+**5. analyticsSlice:**
+- State: dashboardData, salesTrends, topProducts, loading
+- Actions: fetchDashboard, fetchTrends, fetchTopProducts
+- Cache: 5 minutes for analytics data
+
+### 9.3 Component Architecture
+
+**Component Categories:**
+
+**1. Common Components:**
+- Button, Input, Select, Modal, Table, Card
+- Navbar, Sidebar, Footer
+- Loading, ErrorBoundary, Toast
+- DataTable with sorting/filtering
+- DateRangePicker, SearchBar
+
+**2. Feature Components:**
+- ProductList, ProductForm, ProductCard
+- SalesList, CreateSale, Invoice
+- PurchaseList, PurchaseForm
+- CustomerList, CustomerForm
+- Dashboard, SalesChart, ProfitChart
+
+**3. Layout Components:**
+- MainLayout (with Navbar + Sidebar)
+- AuthLayout (centered, no navigation)
+- DashboardLayout (with analytics widgets)
+
+### 9.4 API Service Layer
+
+**Service Structure:**
+- `api.js` - Axios instance with interceptors
+- `authService.js` - Authentication operations
+- `productService.js` - Product CRUD operations
+- `saleService.js` - Sales operations
+- `analyticsService.js` - Analytics data fetching
+
+**Axios Configuration:**
+- Base URL from environment variable
+- Request interceptor: Add JWT token to headers
+- Response interceptor: Handle 401 errors, refresh token
+- Error handling: Standardized error messages
+- Timeout: 30 seconds for API calls
+
+### 9.5 UI/UX Design Guidelines
+
+**Color Palette:**
+- Primary: Deep Blue `#1E3A8A`
+- Secondary: Neon Green `#10B981`
+- Success: `#22C55E`
+- Warning: `#F59E0B`
+- Error: `#EF4444`
+- Background: `#F9FAFB`
+- Text: `#111827`
+
+**Typography:**
+- Font: Inter or System UI
+- Headings: Bold, larger sizes
+- Body: Regular, readable sizes
+- Code/Numbers: Monospace font
+
+**Responsive Breakpoints:**
+- Mobile: < 640px
+- Tablet: 640px - 1024px
+- Desktop: > 1024px
+
+**Design Principles:**
+- Mobile-first approach
+- Consistent spacing (4px, 8px, 16px, 24px, 32px)
+- Accessibility: ARIA labels, keyboard navigation
+- Loading states for all async operations
+- Error messages with actionable solutions
+
+---
+
+## 10. Project Structure
+
+### 10.1 Backend Directory Structure
+
+```
+stockpilot-backend/
+│
+├── config/
+│   ├── database.js              # MongoDB connection
+│   └── config.js                # App configuration
+│
+├── models/
+│   ├── User.js                  # User schema
+│   ├── Product.js               # Product schema
+│   ├── Sale.js                  # Sale schema
+│   ├── Purchase.js              # Purchase schema
+│   ├── Customer.js              # Customer schema
+│   ├── Supplier.js              # Supplier schema
+│   └── Expense.js               # Expense schema
+│
+├── controllers/
+│   ├── authController.js        # Authentication logic
+│   ├── productController.js     # Product operations
+│   ├── saleController.js        # Sales operations
+│   ├── purchaseController.js    # Purchase operations
+│   ├── customerController.js    # Customer operations
+│   ├── supplierController.js    # Supplier operations
+│   ├── expenseController.js     # Expense operations
+│   └── analyticsController.js   # Analytics operations
+│
+├── routes/
+│   ├── auth.js                  # Auth routes
+│   ├── products.js              # Product routes
+│   ├── sales.js                 # Sales routes
+│   ├── purchases.js             # Purchase routes
+│   ├── customers.js             # Customer routes
+│   ├── suppliers.js             # Supplier routes
+│   ├── expenses.js              # Expense routes
+│   └── analytics.js             # Analytics routes
+│
+├── middleware/
+│   ├── auth.js                  # Authentication middleware
+│   ├── authorize.js             # Authorization middleware
+│   ├── errorHandler.js          # Error handling
+│   ├── validator.js             # Input validation
+│   ├── rateLimiter.js           # Rate limiting
+│   └── upload.js                # File upload handling
+│
+├── utils/
+│   ├── generateInvoice.js       # Invoice PDF generation
+│   ├── emailService.js          # Email sending
+│   ├── pdfGenerator.js          # PDF utilities
+│   ├── helpers.js               # Helper functions
+│   └── constants.js             # App constants
+│
+├── validators/
+│   ├── userValidator.js         # User validation rules
+│   ├── productValidator.js      # Product validation
+│   ├── saleValidator.js         # Sale validation
+│   └── purchaseValidator.js     # Purchase validation
+│
+├── tests/
+│   ├── unit/                    # Unit tests
+│   ├── integration/             # Integration tests
+│   └── setup.js                 # Test configuration
+│
+├── .env                         # Environment variables
+├── .env.example                 # Example env file
+├── .gitignore                   # Git ignore file
+├── package.json                 # Dependencies
+├── server.js                    # Entry point
+└── README.md                    # Documentation
+```
+
+### 10.2 Frontend Directory Structure
+
+```
+stockpilot-frontend/
+│
+├── public/
+│   ├── index.html               # HTML template
+│   ├── favicon.ico              # Favicon
+│   └── assets/                  # Static assets
+│
+├── src/
+│   ├── components/
+│   │   ├── common/              # Reusable components
+│   │   │   ├── Button.jsx
+│   │   │   ├── Input.jsx
+│   │   │   ├── Modal.jsx
+│   │   │   ├── Table.jsx
+│   │   │   ├── Loading.jsx
+│   │   │   └── ErrorMessage.jsx
+│   │   │
+│   │   ├── layout/              # Layout components
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Sidebar.jsx
+│   │   │   ├── MainLayout.jsx
+│   │   │   └── AuthLayout.jsx
+│   │   │
+│   │   ├── auth/                # Auth components
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   └── ForgotPassword.jsx
+│   │   │
+│   │   ├── products/            # Product components
+│   │   │   ├── ProductList.jsx
+│   │   │   ├── ProductForm.jsx
+│   │   │   ├── ProductCard.jsx
+│   │   │   └── ProductFilters.jsx
+│   │   │
+│   │   ├── sales/               # Sales components
+│   │   │   ├── SalesList.jsx
+│   │   │   ├── CreateSale.jsx
+│   │   │   ├── SaleDetails.jsx
+│   │   │   └── Invoice.jsx
+│   │   │
+│   │   ├── purchases/           # Purchase components
+│   │   │   ├── PurchaseList.jsx
+│   │   │   ├── PurchaseForm.jsx
+│   │   │   └── PurchaseDetails.jsx
+│   │   │
+│   │   ├── customers/           # Customer components
+│   │   │   ├── CustomerList.jsx
+│   │   │   ├── CustomerForm.jsx
+│   │   │   └── CustomerDetails.jsx
+│   │   │
+│   │   └── analytics/           # Analytics components
+│   │       ├── Dashboard.jsx
+│   │       ├── SalesChart.jsx
+│   │       ├── ProfitChart.jsx
+│   │       ├── CategoryChart.jsx
+│   │       └── KPICard.jsx
+│   │
+│   ├── pages/
+│   │   ├── Dashboard.jsx        # Dashboard page
+│   │   ├── Products.jsx         # Products page
+│   │   ├── Sales.jsx            # Sales page
+│   │   ├── Purchases.jsx        # Purchases page
+│   │   ├── Customers.jsx        # Customers page
+│   │   ├── Suppliers.jsx        # Suppliers page
+│   │   ├── Analytics.jsx        # Analytics page
+│   │   ├── Expenses.jsx         # Expenses page
+│   │   ├── Settings.jsx         # Settings page
+│   │   └── NotFound.jsx         # 404 page
+│   │
+│   ├── store/
+│   │   ├── store.js             # Redux store config
+│   │   └── slices/
+│   │       ├── authSlice.js
+│   │       ├── productSlice.js
+│   │       ├── saleSlice.js
+│   │       ├── purchaseSlice.js
+│   │       └── analyticsSlice.js
+│   │
+│   ├── services/
+│   │   ├── api.js               # Axios instance
+│   │   ├── authService.js       # Auth API calls
+│   │   ├── productService.js    # Product API calls
+│   │   ├── saleService.js       # Sale API calls
+│   │   └── analyticsService.js  # Analytics API calls
+│   │
+│   ├── hooks/
+│   │   ├── useAuth.js           # Auth hook
+│   │   ├── useDebounce.js       # Debounce hook
+│   │   └── useInfiniteScroll.js # Infinite scroll
+│   │
+│   ├── utils/
+│   │   ├── helpers.js           # Helper functions
+│   │   ├── constants.js         # Constants
+│   │   ├── formatters.js        # Data formatters
+│   │   └── validators.js        # Client-side validation
+│   │
+│   ├── guards/
+│   │   ├── AuthGuard.jsx        # Protected route guard
+│   │   └── RoleGuard.jsx        # Role-based guard
+│   │
+│   ├── App.jsx                  # Main App component
+│   ├── index.js                 # Entry point
+│   └── index.css                # Global styles
+│
+├── .env                         # Environment variables
+├── .env.example                 # Example env file
+├── .gitignore                   # Git ignore
+├── package.json                 # Dependencies
+├── tailwind.config.js           # Tailwind config
+└── README.md                    # Documentation
+```
+
+---
+
+## 11. Implementation Strategy
+
+### 11.1 Development Phases
+
+**Phase 1: Foundation & MVP (Week 1-3)**
+
+**Sprint 1 (Week 1): Backend Foundation**
+- Set up Node.js + Express project
+- Configure MongoDB connection
+- Implement User model and authentication
+- Create JWT authentication middleware
+- Set up basic error handling
+- Configure environment variables
+
+**Sprint 2 (Week 2): Core Data Models**
+- Implement Product, Customer, Supplier models
+- Create Sale and Purchase models
+- Set up Expense model
+- Create database indexes
+- Write model validation logic
+- Test CRUD operations
+
+**Sprint 3 (Week 3): Basic API Endpoints**
+- Authentication endpoints (login, register)
+- Product CRUD endpoints
+- Customer/Supplier CRUD endpoints
+- Basic sales endpoints
+- Purchase endpoints
+- Input validation middleware
+
+**Deliverables:**
+- Functioning backend API
+- Database with all schemas
+- Authentication system
+- Postman collection for testing
+
+---
+
+**Phase 2: Frontend Foundation (Week 4-6)**
+
+**Sprint 4 (Week 4): React Setup & Auth**
+- Initialize React application
+- Set up Redux Toolkit
+- Configure React Router
+- Implement login/register pages
+- Create protected route guards
+- Set up Axios interceptors
+
+**Sprint 5 (Week 5): Core UI Components**
+- Design and build common components
+- Create layout components (Navbar, Sidebar)
+- Implement product management pages
+- Build customer/supplier pages
+- Create form components with validation
+
+**Sprint 6 (Week 6): Sales & Purchase UI**
+- Create sales management interface
+- Build invoice generation UI
+- Implement purchase order interface
+- Add data tables with sorting/filtering
+- Integrate with backend APIs
+
+**Deliverables:**
+- Functional frontend application
+- User authentication flow
+- Product, Customer, Supplier management
+- Basic sales and purchase features
+
+---
+
+**Phase 3: Analytics & Reporting (Week 7-9)**
+
+**Sprint 7 (Week 7): Analytics Backend**
+- Implement analytics controller
+- Create aggregation pipelines
+- Build sales trends endpoint
+- Develop profit analysis endpoint
+- Create top products endpoint
+
+**Sprint 8 (Week 8): Dashboard & Charts**
+- Build analytics dashboard
+- Integrate Chart.js/Recharts
+- Create KPI cards
+- Implement date range filters
+- Build sales trends chart
+- Create profit analysis charts
+
+**Sprint 9 (Week 9): Financial Reports**
+- Expense management interface
+- Profit & Loss report
+- Financial summary
+- Export to PDF/Excel
+- Email report generation
+
+**Deliverables:**
+- Complete analytics dashboard
+- Financial reports
+- Data visualization
+- Export functionality
+
+---
+
+**Phase 4: Advanced Features (Week 10-12)**
+
+**Sprint 10 (Week 10): Smart Features**
+- Low stock alerts
+- Auto-reorder suggestions
+- Sales forecasting logic
+- Customer loyalty points
+- Multi-warehouse support
+
+**Sprint 11 (Week 11): User Management**
+- Role management interface
+- Permission assignment
+- User activity logs
+- Audit trail system
+- User preferences
+
+**Sprint 12 (Week 12): Polish & Optimization**
+- Performance optimization
+- Code refactoring
+- Bug fixes
+- UI/UX improvements
+- Responsive design refinement
+
+**Deliverables:**
+- AI-powered features
+- Complete user management
+- Optimized application
+- Production-ready code
+
+---
+
+**Phase 5: Testing & Deployment (Week 13-14)**
+
+**Sprint 13 (Week 13): Testing**
+- Unit tests for backend
+- Integration tests
+- Frontend component tests
+- End-to-end tests
+- Load testing
+- Security testing
+
+**Sprint 14 (Week 14): Deployment**
+- Deploy backend to AWS/Render
+- Deploy frontend to Vercel
+- Configure MongoDB Atlas
+- Set up CI/CD pipeline
+- Configure monitoring
+- Create backup strategy
+
+**Deliverables:**
+- Fully tested application
+- Deployed production environment
+- Documentation
+- Monitoring setup
+
+---
+
+### 11.2 Development Best Practices
+
+**Code Quality:**
+- Follow ES6+ standards
+- Use ESLint and Prettier
+- Write clean, commented code
+- Follow RESTful API conventions
+- Use meaningful variable names
+- Implement error boundaries
+
+**Version Control:**
+- Use Git with feature branches
+- Meaningful commit messages
+- Pull request reviews
+- Branch naming: `feature/`, `bugfix/`, `hotfix/`
+- Never commit .env files
+- Regular code backups
+
+**Testing Strategy:**
+- Write tests alongside features
+- Minimum 70% code coverage
+- Test edge cases
+- Mock external dependencies
+- Automated testing in CI/CD
+
+**Documentation:**
+- API documentation (Postman/Swagger)
+- Code comments for complex logic
+- README for setup instructions
+- Database schema documentation
+- User manual
+
+---
+
+## 12. Security Guidelines
+
+### 12.1 Backend Security Checklist
+
+**Authentication Security:**
+- ✅ Use bcrypt for password hashing (12+ salt rounds)
+- ✅ Implement JWT with secure secret keys
+- ✅ Set appropriate token expiration (7 days access, 30 days refresh)
+- ✅ Implement refresh token rotation
+- ✅ Use HTTPS only in production
+- ✅ Implement account lockout after failed attempts
+- ✅ Two-factor authentication (optional but recommended)
+
+**Data Security:**
+- ✅ Validate all input data (express-validator)
+- ✅ Sanitize data to prevent NoSQL injection
+- ✅ Prevent XSS attacks (xss-clean)
+- ✅ Use parameterized queries
+- ✅ Encrypt sensitive data at rest
+- ✅ Implement rate limiting
+- ✅ Use CORS with specific origins
+
+**API Security:**
+- ✅ Use Helmet for security headers
+- ✅ Implement CSRF protection
+- ✅ Rate limit all endpoints
+- ✅ Log all security events
+- ✅ Implement API versioning
+- ✅ Use secure session management
+- ✅ Validate file uploads
+
+**Database Security:**
+- ✅ Use connection string encryption
+- ✅ Implement IP whitelisting
+- ✅ Use separate DB users per environment
+- ✅ Enable MongoDB authentication
+- ✅ Regular backups (automated)
+- ✅ Encrypt backups
+- ✅ Monitor for suspicious activity
+
+### 12.2 Frontend Security Checklist
+
+**Client-Side Security:**
+- ✅ Store tokens in httpOnly cookies (preferred) or localStorage
+- ✅ Implement XSS protection
+- ✅ Validate user input on client side
+- ✅ Use Content Security Policy
+- ✅ Avoid storing sensitive data in local storage
+- ✅ Implement proper error handling
+- ✅ Use HTTPS only
+
+**Code Security:**
+- ✅ Keep dependencies updated
+- ✅ Audit packages regularly (npm audit)
+- ✅ Don't expose API keys in frontend code
+- ✅ Use environment variables
+- ✅ Implement proper CORS configuration
+- ✅ Validate data before sending to API
+
+### 12.3 Environment-Specific Security
+
+**Development:**
+- Use separate database
+- Mock payment gateways
+- Detailed error logging
+- Relaxed CORS for testing
+
+**Production:**
+- Strict CORS policies
+- Minimal error details to client
+- Enable all security headers
+- Use SSL certificates
+- Monitor security logs
+- Regular security audits
+
+---
+
+## 13. Testing Strategy
+
+### 13.1 Backend Testing
+
+**Unit Tests:**
+- Test individual functions
+- Test model methods
+- Test utility functions
+- Use Jest framework
+- Mock external dependencies
+- Target: 80% coverage
+
+**Integration Tests:**
+- Test API endpoints
+- Test database operations
+- Test authentication flow
+- Use Supertest
+- Test error scenarios
+- Test validation rules
+
+**Example Test Structure:**
+```javascript
+describe('Product API', () => {
+  describe('POST /api/products', () => {
+    it('should create a product with valid data', async () => {
+      // Test implementation
+    });
+    
+    it('should return 400 with invalid SKU', async () => {
+      // Test implementation
+    });
+  });
+});
+```
+
+### 13.2 Frontend Testing
+
+**Component Tests:**
+- Test React components
+- Test user interactions
+- Test form submissions
+- Use React Testing Library
+- Test accessibility
+
+**Redux Tests:**
+- Test reducers
+- Test actions
+- Test async thunks
+- Test store configuration
+
+**E2E Tests:**
+- Test complete user flows
+- Test critical paths
+- Use Cypress or Playwright
+- Test across browsers
+
+### 13.3 Testing Tools
+
+| Type | Tool | Purpose |
+|------|------|---------|
+| Unit Testing | Jest | JavaScript testing |
+| API Testing | Supertest | HTTP assertions |
+| Frontend Testing | React Testing Library | Component testing |
+| E2E Testing | Cypress | Full flow testing |
+| Coverage | Istanbul | Code coverage |
+| Mocking | MSW | API mocking |
+
+---
+
+## 14. Deployment Guide
+
+### 14.1 Backend Deployment (Render/AWS)
+
+**Pre-Deployment Checklist:**
+- ✅ Set NODE_ENV=production
+- ✅ Configure production MongoDB URI
+- ✅ Set secure JWT secrets
+- ✅ Enable CORS with specific origins
+- ✅ Configure error logging
+- ✅ Set up SSL certificate
+- ✅ Configure rate limiting
+- ✅ Set up monitoring
+
+**Render Deployment Steps:**
+1. Create new Web Service on Render
+2. Connect GitHub repository
+3. Set build command: `npm install`
+4. Set start command: `npm start`
+5. Add environment variables from .env
+6. Set instance type (Starter or higher)
+7. Deploy and verify health endpoint
+
+**AWS EC2 Deployment:**
+1. Launch EC2 instance (Ubuntu 22.04)
+2. Install Node.js and npm
+3. Clone repository
+4. Install dependencies
+5. Set up PM2 for process management
+6. Configure nginx as reverse proxy
+7. Set up SSL with Let's Encrypt
+8. Configure security groups
+
+### 14.2 Frontend Deployment (Vercel)
+
+**Pre-Deployment:**
+- ✅ Set REACT_APP_API_URL to production backend
+- ✅ Build production bundle
+- ✅ Test production build locally
+- ✅ Optimize images and assets
+- ✅ Enable compression
+
+**Vercel Deployment Steps:**
+1. Install Vercel CLI: `npm i -g vercel`
+2. Login: `vercel login`
+3. Deploy: `vercel --prod`
+4. Configure environment variables in Vercel dashboard
+5. Set up custom domain (optional)
+6. Enable automatic deployments from GitHub
+
+**Alternative: Netlify Deployment:**
+1. Connect GitHub repository
+2. Set build command: `npm run build`
+3. Set publish directory: `build`
+4. Add environment variables
+5. Deploy
+
+### 14.3 Database Deployment (MongoDB Atlas)
+
+**Setup Steps:**
+1. Create MongoDB Atlas account
+2. Create new cluster (Shared/Dedicated)
+3. Choose cloud provider and region
+4. Set cluster name
+5. Create database user with strong password
+6. Configure network access (whitelist IPs)
+7. Get connection string
+8. Update backend MONGO_URI
+
+**Production Configuration:**
+- Enable auto-scaling
+- Configure backup schedule (daily recommended)
+- Set up monitoring and alerts
+- Enable encryption at rest
+- Configure read replicas for high availability
+
+### 14.4 CI/CD Pipeline
+
+**GitHub Actions Workflow:**
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - Checkout code
+      - Install dependencies
+      - Run tests
+      - Check code coverage
+      
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - Deploy to production
+      - Run smoke tests
+```
+
+---
+
+## 15. Performance Optimization
+
+### 15.1 Backend Optimization
+
+**Database Optimization:**
+- Create appropriate indexes
+- Use aggregation pipeline efficiently
+- Implement pagination for large datasets
+- Use projection to limit returned fields
+- Enable connection pooling
+- Use MongoDB explain() for query analysis
+
+**API Optimization:**
+- Implement caching (Redis recommended)
+- Use compression middleware (gzip)
+- Optimize payload sizes
+- Implement lazy loading
+- Use CDN for static assets
+- Batch similar requests
+
+**Code Optimization:**
+- Use async/await properly
+- Avoid blocking operations
+- Implement request queuing
+- Use worker threads for CPU-intensive tasks
+- Optimize loops and algorithms
+- Profile code regularly
+
+### 15.2 Frontend Optimization
+
+**React Optimization:**
+- Use React.memo for expensive components
+- Implement code splitting (React.lazy)
+- Use virtual scrolling for large lists
+- Optimize re-renders
+- Use production build
+- Lazy load routes
+
+**Asset Optimization:**
+- Compress images (WebP format)
+- Minify CSS and JavaScript
+- Use CDN for third-party libraries
+- Implement lazy loading for images
+- Use tree shaking
+- Enable caching headers
+
+**Network Optimization:**
+- Minimize API calls
+- Implement request debouncing
+- Use service workers for offline support
+- Implement optimistic UI updates
+- Cache API responses
+- Use HTTP/2
+
+### 15.3 Monitoring & Performance Metrics
+
+**Backend Monitoring:**
+- Response time per endpoint
+- Error rate
+- CPU and memory usage
+- Database query performance
+- API request rate
+- Active connections
+
+**Frontend Monitoring:**
+- Page load time
+- Time to interactive
+- First contentful paint
+- Largest contentful paint
+- Cumulative layout shift
+- Core Web Vitals
+
+**Tools:**
+- Backend: PM2, New Relic, DataDog
+- Frontend: Google Lighthouse, Web Vitals
+- Database: MongoDB Atlas Monitoring
+- Logs: Winston, Morgan, ELK Stack
+
+---
+
+## 16. Additional Resources
+
+### 16.1 Package.json Files
+
+**Backend Dependencies:**
+```json
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "dotenv": "^16.3.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "express-mongo-sanitize": "^2.2.0",
+    "xss-clean": "^0.1.4",
+    "hpp": "^0.2.3",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^7.1.5",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.7",
+    "pdfkit": "^0.13.0",
+    "multer": "^1.4.5-lts.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.1"
+  }
+}
+```
+
+**Frontend Dependencies:**
+```json
+{
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@reduxjs/toolkit": "^2.0.1",
+    "react-redux": "^9.0.4",
+    "react-router-dom": "^6.21.0",
+    "axios": "^1.6.2",
+    "@tanstack/react-query": "^5.14.2",
+    "react-hook-form": "^7.49.2",
+    "chart.js": "^4.4.1",
+    "react-chartjs-2": "^5.2.0",
+    "date-fns": "^3.0.6",
+    "react-toastify": "^9.1.3",
+    "lucide-react": "^0.303.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.1",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/jest-dom": "^6.1.5"
+  }
+}
+```
+
+### 16.2 Useful Commands
+
+**Backend:**
+```bash
+# Development
+npm run dev
+
+# Production
+npm start
+
+# Run tests
+npm test
+
+# Database seed
+npm run seed
+
+# Check for vulnerabilities
+npm audit
+
+# Fix vulnerabilities
+npm audit fix
+```
+
+**Frontend:**
+```bash
+# Development server
+npm start
+
+# Production build
+npm run build
+
+# Run tests
+npm test
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+```
+
+---
+
+## 17. Conclusion
+
+### 17.1 Next Steps for AI Development Team
+
+1. **Week 1:** Set up development environment and initialize projects
+2. **Week 2-3:** Implement backend foundation and core models
+3. **Week 4-6:** Build frontend foundation and core UI
+4. **Week 7-9:** Develop analytics and reporting features
+5. **Week 10-12:** Implement advanced features and optimization
+6. **Week 13-14:** Testing, bug fixing, and deployment
+
+### 17.2 Success Metrics
+
+**Technical Metrics:**
+- API response time < 200ms
+- 99.9% uptime
+- Zero critical security vulnerabilities
+- 80%+ code coverage
+- Page load time < 2 seconds
+
+**Business Metrics:**
+- User adoption rate
+- Feature usage statistics
+- Error rate < 1%
+- Customer satisfaction score
+- Support ticket reduction
+
+### 17.3 Support & Maintenance
+
+**Post-Launch:**
+- Monitor application health 24/7
+- Regular security updates
+- Monthly feature releases
+- Bug
