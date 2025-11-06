@@ -20,7 +20,7 @@ Let’s refine your **Store Management System** documentation into an **Emergent
 Inventory:
   - Product CRUD (name, sku, category, supplier, unit)
   - Stock tracking (auto update on sale/purchase)
-  - Low stock + expiry alerts
+  - Low stock 
   - Batch management + audit logs
 
 Pricing:
@@ -35,18 +35,19 @@ Sales:
   - Invoicing (print/pdf)
   - Returns & refunds
   - Customer tracking
+  - Transaction ID
 
 Analytics:
   - Period filters: 1D / 1W / 1M / 1Y
-  - KPIs: sales, profit, expenses, top products
+  - KPIs: sales, profit, expenses, top products, loss
   - Charts: revenue trend, category breakdown
   - Export: PDF, Excel
 
 Users:
-  - Roles: Admin, Manager, Sales, Accountant
+  - Roles: Admin
   - RBAC access control
   - Login with JWT
-  - Audit trail, 2FA (optional)
+  - Audit trail
 ```
 
 ---
