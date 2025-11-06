@@ -9,6 +9,8 @@ import { Dashboard } from './pages/Dashboard';
 import { Products } from './pages/Products';
 import { Customers } from './pages/Customers';
 import { Suppliers } from './pages/Suppliers';
+import POS from './pages/POS';
+import Sales from './pages/Sales';
 import './App.css';
 
 function App() {
